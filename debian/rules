@@ -1,9 +1,11 @@
 #!/usr/bin/make -f
 
-DH_VERBOSE=1
+DH_VERBOSE=0
+KREL=$(shell uname -r)
 
 %:
 	dh $@
 
 override_dh_auto_install:
-	install -D linux-3.2.0/net/netfilter/xt_cgroup.ko debian/xt-cgroup-module/lib/modules/3.2.0-69-virtual/extra/xt_cgroup.ko
+	install -D linux-3.2.0/net/netfilter/x_tables.ko debian/xt-cgroup-module/lib/modules/$(KREL)/extra/x_tables.ko
+	install -D linux-3.2.0/net/netfilter/xt_cgroup.ko debian/xt-cgroup-module/lib/modules/$(KREL)/extra/xt_cgroup.ko

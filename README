@@ -29,7 +29,7 @@ sudo apt-get install linux-headers-$( uname -r )
 
 apt-get source linux-source-3.2.0
 cd linux-3.2.0/
-patch -p1 < ~/git/xt_cgroup/xt_cgroup.patch # from this repository
+patch -p1 < ../xt_cgroup.patch
 cp /usr/src/linux-headers-$( uname -r )/Module.symvers .
 
 make oldconfig # Press 'm': "control group" match support (NETFILTER_XT_MATCH_CGROUP) [N/m/?] (NEW) m
@@ -37,6 +37,5 @@ make prepare
 make scripts
 make M=net/netfilter modules
 mkdir build
-cp net/netfilter/xt_cgroup.ko build/
 dpkg-buildpackage -uc -us -b
 

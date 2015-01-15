@@ -1,0 +1,13 @@
+#!/bin/bash
+
+KREL=<%= KREL %>
+
+if [  "$( uname -r )" != "$KREL" ]; then
+  cat <<EOF
+This package contains a kernel module build for kernel $KREL.
+The current running kernel is $( uname -r ). These do not match.
+Refusing to install this package.
+EOF
+  exit 1
+fi
+
