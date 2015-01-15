@@ -1,3 +1,14 @@
+diff -ruN a/Makefile b/Makefile
+--- a/Makefile    2015-01-15 16:09:24.909515215 +0000
++++ b/Makefile    2015-01-15 16:09:29.753537172 +0000
+@@ -1,6 +1,6 @@
+ VERSION = 3
+ PATCHLEVEL = 2
+-SUBLEVEL = 14
++SUBLEVEL = 0
+ EXTRAVERSION =
+ NAME = Saber-toothed Squirrel
+
 diff -ruN a/include/linux/netfilter/xt_cgroup.h b/include/linux/netfilter/xt_cgroup.h
 --- a/include/linux/netfilter/xt_cgroup.h	1970-01-01 00:00:00.000000000 +0000
 +++ b/include/linux/netfilter/xt_cgroup.h	2015-01-14 23:09:59.680441422 +0000
