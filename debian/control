@@ -1,0 +1,12 @@
+Source: xt-cgroup-module
+Section: misc
+Priority: optional
+Build-Depends: debhelper (>= 7)
+Maintainer: Matthew Callaway <mcallawa@genome.wustl.edu>
+Standards-Version: 3.8.4
+
+Package: xt-cgroup-module
+Architecture: all
+Description: A linux netfilter match for cgroup
+ A linux netfilter match for cgroup
+

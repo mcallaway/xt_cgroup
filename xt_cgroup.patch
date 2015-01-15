@@ -1,0 +1,121 @@
+diff -ruN a/include/linux/netfilter/xt_cgroup.h b/include/linux/netfilter/xt_cgroup.h
+--- a/include/linux/netfilter/xt_cgroup.h	1970-01-01 00:00:00.000000000 +0000
++++ b/include/linux/netfilter/xt_cgroup.h	2015-01-14 23:09:59.680441422 +0000
+@@ -0,0 +1,11 @@
++#ifndef _UAPI_XT_CGROUP_H
++#define _UAPI_XT_CGROUP_H
++
++#include <linux/types.h>
++
++struct xt_cgroup_info {
++	__u32 id;
++	__u32 invert;
++};
++
++#endif /* _UAPI_XT_CGROUP_H */
+diff -ruN a/net/netfilter/Kconfig b/net/netfilter/Kconfig
+--- a/net/netfilter/Kconfig	2012-01-04 23:55:44.000000000 +0000
++++ b/net/netfilter/Kconfig	2015-01-14 23:09:59.680441422 +0000
+@@ -657,6 +657,16 @@
+ 	  If you want to compile it as a module, say M here and read
+ 	  <file:Documentation/kbuild/modules.txt>.  If unsure, say `N'.
+ 
++config NETFILTER_XT_MATCH_CGROUP
++	tristate '"control group" match support'
++	depends on NETFILTER_ADVANCED
++	depends on CGROUPS
++	select CGROUP_NET_CLASSID
++	---help---
++	Socket/process control group matching allows you to match locally
++	generated packets based on which net_cls control group processes
++	belong to.
++
+ config NETFILTER_XT_MATCH_CLUSTER
+ 	tristate '"cluster" match support'
+ 	depends on NF_CONNTRACK
+diff -ruN a/net/netfilter/Makefile b/net/netfilter/Makefile
+--- a/net/netfilter/Makefile	2012-01-04 23:55:44.000000000 +0000
++++ b/net/netfilter/Makefile	2015-01-14 23:09:59.684441426 +0000
+@@ -92,6 +92,7 @@
+ obj-$(CONFIG_NETFILTER_XT_MATCH_MULTIPORT) += xt_multiport.o
+ obj-$(CONFIG_NETFILTER_XT_MATCH_OSF) += xt_osf.o
+ obj-$(CONFIG_NETFILTER_XT_MATCH_OWNER) += xt_owner.o
++obj-$(CONFIG_NETFILTER_XT_MATCH_CGROUP) += xt_cgroup.o
+ obj-$(CONFIG_NETFILTER_XT_MATCH_PHYSDEV) += xt_physdev.o
+ obj-$(CONFIG_NETFILTER_XT_MATCH_PKTTYPE) += xt_pkttype.o
+ obj-$(CONFIG_NETFILTER_XT_MATCH_POLICY) += xt_policy.o
+diff -ruN a/net/netfilter/xt_cgroup.c b/net/netfilter/xt_cgroup.c
+--- a/net/netfilter/xt_cgroup.c	1970-01-01 00:00:00.000000000 +0000
++++ b/net/netfilter/xt_cgroup.c	2015-01-14 23:09:59.684441426 +0000
+@@ -0,0 +1,71 @@
++/*
++ * Xtables module to match the process control group.
++ *
++ * Might be used to implement individual "per-application" firewall
++ * policies in contrast to global policies based on control groups.
++ * Matching is based upon processes tagged to net_cls' classid marker.
++ *
++ * (C) 2013 Daniel Borkmann <dborkman@redhat.com>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++#include <linux/skbuff.h>
++#include <linux/module.h>
++#include <linux/netfilter/x_tables.h>
++#include <linux/netfilter/xt_cgroup.h>
++#include <net/sock.h>
++
++MODULE_LICENSE("GPL");
++MODULE_AUTHOR("Daniel Borkmann <dborkman@redhat.com>");
++MODULE_DESCRIPTION("Xtables: process control group matching");
++MODULE_ALIAS("ipt_cgroup");
++MODULE_ALIAS("ip6t_cgroup");
++
++static int cgroup_mt_check(const struct xt_mtchk_param *par)
++{
++	struct xt_cgroup_info *info = par->matchinfo;
++
++	if (info->invert & ~1)
++		return -EINVAL;
++
++	return info->id ? 0 : -EINVAL;
++}
++
++static bool
++cgroup_mt(const struct sk_buff *skb, struct xt_action_param *par)
++{
++	const struct xt_cgroup_info *info = par->matchinfo;
++
++	if (skb->sk == NULL)
++		return false;
++
++	return (info->id == skb->sk->sk_classid) ^ info->invert;
++}
++
++static struct xt_match cgroup_mt_reg __read_mostly = {
++	.name       = "cgroup",
++	.revision   = 0,
++	.family     = NFPROTO_UNSPEC,
++	.checkentry = cgroup_mt_check,
++	.match      = cgroup_mt,
++	.matchsize  = sizeof(struct xt_cgroup_info),
++	.me         = THIS_MODULE,
++	.hooks      = (1 << NF_INET_LOCAL_OUT) |
++		      (1 << NF_INET_POST_ROUTING),
++};
++
++static int __init cgroup_mt_init(void)
++{
++	return xt_register_match(&cgroup_mt_reg);
++}
++
++static void __exit cgroup_mt_exit(void)
++{
++	xt_unregister_match(&cgroup_mt_reg);
++}
++
++module_init(cgroup_mt_init);
++module_exit(cgroup_mt_exit);

@@ -1,0 +1,5 @@
+xt-cgroup-module (0.0.1-1) lucid; urgency=low
+
+  * Initial Release.
+
+ -- Matthew Callaway <mcallawa@genome.wustl.edu>  Thu, 15 Jan 2015 00:49:48 +0000

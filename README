@@ -1,0 +1,42 @@
+
+Back porting xt_cgroup to the Ubuntu Precise kernel.
+
+References:
+
+http://lwn.net/Articles/569678/
+http://askubuntu.com/questions/515407/how-recipe-to-build-only-one-kernel-module
+
+patches:
+http://git.kernel.org/cgit/linux/kernel/git/pablo/nftables.git/patch/net/netfilter/xt_cgroup.c?id=82a37132f300ea53bdcd812917af5a6329ec80c3
+
+I started with that patch, applied it once, then ran a diff -ruN on the source to get a clean patch.
+I removed the uapi directory in the path to the source.
+
+Also, there is an iptables patch for the xt_cgroup frontend. This is built separately.
+See our iptables git repo for this build of the user space tools.
+https://git.netfilter.org/iptables/commit/?id=6465867eb48506687872b838b1ddfee61d1a0aeb
+git.gsc.wustl.edu/srv/git/vendor/iptables.git
+
+Ensure we're running the right kernel as our target host,
+in this case the kernel on data-xfer-i2 (i2dp).
+
+  root@data-xfer-i2:~# uname -r
+  3.2.0-67-generic
+
+from this git repository's dir:
+
+sudo apt-get install linux-headers-$( uname -r )
+
+apt-get source linux-source-3.2.0
+cd linux-3.2.0/
+patch -p1 < ~/git/xt_cgroup/xt_cgroup.patch # from this repository
+cp /usr/src/linux-headers-$( uname -r )/Module.symvers .
+
+make oldconfig # Press 'm': "control group" match support (NETFILTER_XT_MATCH_CGROUP) [N/m/?] (NEW) m
+make prepare
+make scripts
+make M=net/netfilter modules
+mkdir build
+cp net/netfilter/xt_cgroup.ko build/
+dpkg-buildpackage -uc -us -b
+

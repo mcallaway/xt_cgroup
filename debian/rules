@@ -1,0 +1,9 @@
+#!/usr/bin/make -f
+
+DH_VERBOSE=1
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	install -D linux-3.2.0/net/netfilter/xt_cgroup.ko debian/xt-cgroup-module/lib/modules/3.2.0-69-virtual/extra/xt_cgroup.ko
