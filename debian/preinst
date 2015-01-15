@@ -2,7 +2,7 @@
 
 KREL="3.2.0-67-generic"
 
-if [ "$( uname -r )" != "" ]; then
+if [ "$( uname -r )" != "$KREL" ]; then
   cat <<EOF
 You are trying to install this kernel module package on a host
 running kernel $( uname -r ). But it was packaged for $KREL.
