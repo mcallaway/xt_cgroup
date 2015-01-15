@@ -43,5 +43,6 @@ make M=net/netfilter modules
 
 Set KREL by 'vi debian/preinst' to 'uname -r' to enforce a target host's kernel version.
 
+cd ..
 dpkg-buildpackage -uc -us -b
 
