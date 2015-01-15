@@ -23,6 +23,10 @@ in this case the kernel on data-xfer-i2 (i2dp).
   root@data-xfer-i2:~# uname -r
   3.2.0-67-generic
 
+So in our build environment set it up:
+
+apt-get install linux-image-3.2.0-67-generic=3.2.0-67.101
+
 from this git repository's dir:
 
 sudo apt-get install linux-headers-$( uname -r )
@@ -37,5 +41,8 @@ make prepare
 make scripts
 make M=net/netfilter modules
 mkdir build
+
+Set KREL in debian/preinst to enforce a target host's kernel version.
+
 dpkg-buildpackage -uc -us -b
 
