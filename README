@@ -40,9 +40,8 @@ make oldconfig # Press 'm': "control group" match support (NETFILTER_XT_MATCH_CG
 make prepare
 make scripts
 make M=net/netfilter modules
-mkdir build
 
-Set KREL in debian/preinst to enforce a target host's kernel version.
+Set KREL by 'vi debian/preinst' to 'uname -r' to enforce a target host's kernel version.
 
 dpkg-buildpackage -uc -us -b
 
