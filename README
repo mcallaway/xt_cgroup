@@ -1,13 +1,22 @@
 
 Back porting xt_cgroup to the Ubuntu Precise kernel.
 
-References:
+This is confusing.
 
+Started out with this:
+
+netfilter: xtables: lightweight process control group matching
 http://lwn.net/Articles/569678/
-http://askubuntu.com/questions/515407/how-recipe-to-build-only-one-kernel-module
+http://patchwork.ozlabs.org/patch/280690/
 
-patches:
+But those refer to a cgroup by "fwid" and the use of a net_filter cgroup extension. But that's not what
+we ended up with. We had a net_cls cgroup extension.
+
 http://git.kernel.org/cgit/linux/kernel/git/pablo/nftables.git/patch/net/netfilter/xt_cgroup.c?id=82a37132f300ea53bdcd812917af5a6329ec80c3
+
+Other References:
+
+http://askubuntu.com/questions/515407/how-recipe-to-build-only-one-kernel-module
 
 I started with that patch, applied it once, then ran a diff -ruN on the source to get a clean patch.
 I removed the uapi directory in the path to the source.
@@ -40,19 +49,11 @@ make oldconfig # Press 'm': "control group" match support (NETFILTER_XT_MATCH_CG
                # Answer No for the rest of the new stuff.
 make prepare
 make modules_prepare
-
-#make M=net/netfilter modules   # makes the entire netfilter tree
-make net/netfilter/xt_cgroup.ko # makes just the one module we care about
+make M=net/netfilter xt_cgroup.ko
 
 sudo cp ./net/netfilter/xt_cgroup.ko /lib/modules/3.2.0-67-generic/extra/
 sudo depmod
 sudo modprobe xt_cgroup
-
-Results in:
-tail /var/log/syslog
-xt_cgroup: no symbol version for module_layout
-
-# When it works, we can package with:
 
 cd ..
 dpkg-buildpackage -uc -us -b
