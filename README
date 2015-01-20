@@ -37,11 +37,22 @@ patch -p1 < ../xt_cgroup.patch
 cp /usr/src/linux-headers-$( uname -r )/Module.symvers .
 
 make oldconfig # Press 'm': "control group" match support (NETFILTER_XT_MATCH_CGROUP) [N/m/?] (NEW) m
+               # Answer No for the rest of the new stuff.
 make prepare
-make scripts
-make M=net/netfilter modules
+make modules_prepare
 
-Set KREL by 'vi debian/preinst' to 'uname -r' to enforce a target host's kernel version.
+#make M=net/netfilter modules   # makes the entire netfilter tree
+make net/netfilter/xt_cgroup.ko # makes just the one module we care about
+
+sudo cp ./net/netfilter/xt_cgroup.ko /lib/modules/3.2.0-67-generic/extra/
+sudo depmod
+sudo modprobe xt_cgroup
+
+Results in:
+tail /var/log/syslog
+xt_cgroup: no symbol version for module_layout
+
+# When it works, we can package with:
 
 cd ..
 dpkg-buildpackage -uc -us -b
