@@ -5,10 +5,11 @@ die () {
   exit 1
 }
 
+# Disable for now, not sure this is worth it.
 # Try to remove xt_group and x_tables
 # but they may be in use
-modprobe -r xt_cgroup || \
-  die "Failed to remove xt_cgroup module"
-modprobe -r x_tables || \
-  die "Failed to remove x_tables"
+#modprobe -r xt_cgroup || \
+#  die "Failed to remove xt_cgroup module"
+#modprobe -r x_tables || \
+#  die "Failed to remove x_tables"
 
